@@ -2,19 +2,18 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
-    Enum as SQLEnum,
     ForeignKey,
     Integer,
     String,
     Text,
-    Float,
-    Boolean,
-    create_engine,
+)
+from sqlalchemy import (
+    Enum as SQLEnum,
 )
 from sqlalchemy.orm import DeclarativeBase, relationship
 
@@ -130,7 +129,7 @@ class SearchKeyword(Base):
         return f"<SearchKeyword(keyword='{self.keyword}', jobs_found={self.jobs_found})>"
 
     @property
-    def success_rate(self) -> Optional[float]:
+    def success_rate(self) -> float | None:
         """Calculate interview success rate."""
         if self.applications_sent == 0:
             return None

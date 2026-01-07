@@ -27,7 +27,7 @@ st.markdown("""
     [data-testid="stSidebar"] * {
         color: white !important;
     }
-    
+
     /* Navigation radio buttons */
     [data-testid="stSidebar"] .stRadio > div {
         gap: 0.5rem;
@@ -40,17 +40,23 @@ st.markdown("""
     [data-testid="stSidebar"] .stRadio label:hover {
         background: rgba(255,255,255,0.1);
     }
-    
+
     /* Headers */
     h1, h2, h3 {
         font-weight: 600;
     }
-    
+
     /* Metric cards */
     [data-testid="metric-container"] {
         background: #f8f9fa;
         border-radius: 10px;
         padding: 1rem;
+    }
+
+    /* Source logos */
+    .source-logo {
+        height: 20px;
+        vertical-align: middle;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -58,7 +64,6 @@ st.markdown("""
 # Initialize database
 from src.database.db import init_db
 from src.database.models import Application, ApplicationStatus
-from src.analytics.recommendations import get_daily_recommendation
 
 init_db()
 
@@ -67,36 +72,6 @@ st.sidebar.markdown("""
 # 🎯 Job Hunter
 **Norwegian Job Search Assistant**
 """)
-st.sidebar.markdown("---")
-
-# Daily Recommendation
-st.sidebar.markdown("### 💡 Today's Top Pick")
-rec = get_daily_recommendation()
-if rec:
-    job = rec["job"]
-    company = job.company if job.company else "Company not listed"
-    st.sidebar.markdown(f"**{job.title[:40]}{'...' if len(job.title) > 40 else ''}**")
-    st.sidebar.caption(company)
-    st.sidebar.progress(rec["match_percentage"] / 100, text=f"{rec['match_percentage']}% match")
-    
-    col1, col2 = st.sidebar.columns(2)
-    with col1:
-        if st.button("⭐ Save", key="sidebar_interested", use_container_width=True):
-            from src.database.db import get_db
-            from src.database.models import Job
-            with get_db() as db:
-                j = db.query(Job).filter(Job.id == job.id).first()
-                if j:
-                    if not j.application:
-                        j.application = Application(job_id=job.id)
-                        db.add(j.application)
-                    j.application.status = ApplicationStatus.INTERESTED
-            st.rerun()
-    with col2:
-        st.link_button("View", job.url, use_container_width=True)
-else:
-    st.sidebar.info("Run a scrape to get recommendations")
-
 st.sidebar.markdown("---")
 
 # Navigation with icons
@@ -111,7 +86,8 @@ st.sidebar.markdown("---")
 
 # Quick stats in sidebar
 from src.database.db import get_db
-from src.database.models import Job, Application
+from src.database.models import Job
+
 with get_db() as db:
     total_jobs = db.query(Job).count()
     saved_jobs = db.query(Application).filter(Application.status == ApplicationStatus.INTERESTED).count()

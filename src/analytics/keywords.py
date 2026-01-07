@@ -1,7 +1,6 @@
 """Keyword analysis and recommendations."""
 
 from datetime import datetime, timedelta
-from typing import Optional
 
 from ..database.db import get_db
 from ..database.models import Job, SearchKeyword

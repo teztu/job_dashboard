@@ -8,19 +8,18 @@ project_root = Path(__file__).parent.parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
+import streamlit as st
 
-from src.analytics.stats import (
-    get_jobs_dataframe,
-    get_jobs_by_source,
-    get_jobs_by_company,
-    get_jobs_over_time,
-    get_keyword_stats,
-    get_application_pipeline,
-)
 from src.analytics.keywords import get_keyword_effectiveness, get_keyword_recommendations
+from src.analytics.stats import (
+    get_application_pipeline,
+    get_jobs_by_company,
+    get_jobs_by_source,
+    get_jobs_dataframe,
+    get_jobs_over_time,
+)
 
 
 def render():
@@ -168,19 +167,19 @@ def render():
         st.info("Run a scrape to see keyword analytics")
 
     st.markdown("---")
-    
+
     # Recommended Actions based on pipeline
     st.markdown("### 💡 Recommended Actions")
-    
+
     pipeline = get_application_pipeline()
     interested = pipeline.get("interested", 0)
     applied = pipeline.get("applied", 0)
     interviews = pipeline.get("interview", 0)
     offers = pipeline.get("offer", 0)
     rejected = pipeline.get("rejected", 0)
-    
+
     actions = []
-    
+
     # Generate recommendations based on pipeline status
     if interested == 0 and applied == 0:
         actions.append({
@@ -190,7 +189,7 @@ def render():
         })
     elif interested > 5 and applied == 0:
         actions.append({
-            "priority": "high", 
+            "priority": "high",
             "action": "Start applying!",
             "detail": f"You have {interested} saved jobs but no applications. Pick your top 3 and apply today."
         })
@@ -200,7 +199,7 @@ def render():
             "action": "Increase application volume",
             "detail": f"Only {applied} applications sent. Aim for 5-10 per week for best results."
         })
-    
+
     if applied >= 5 and interviews == 0:
         actions.append({
             "priority": "high",
@@ -213,28 +212,28 @@ def render():
             "action": "Get feedback on applications",
             "detail": "Consider having someone review your CV or try different job types."
         })
-    
+
     if interviews > 0 and offers == 0 and rejected >= interviews:
         actions.append({
             "priority": "medium",
             "action": "Practice interview skills",
             "detail": "Interviews but no offers. Practice common questions and prepare better examples."
         })
-    
+
     if rejected > applied * 0.8 and applied > 5:
         actions.append({
             "priority": "medium",
             "action": "Adjust your target roles",
             "detail": "High rejection rate. Consider if you are applying for roles that match your experience level."
         })
-    
+
     if interested > 10:
         actions.append({
             "priority": "low",
             "action": "Review saved jobs",
             "detail": f"{interested} jobs saved. Go through them and apply to the best matches or remove outdated ones."
         })
-    
+
     if not actions:
         if offers > 0:
             st.success("🎉 **Congratulations!** You have offers on the table. Good luck with your decision!")

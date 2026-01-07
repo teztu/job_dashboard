@@ -11,11 +11,20 @@ if str(project_root) not in sys.path:
 from datetime import datetime
 
 import streamlit as st
-
 from sqlalchemy.orm import joinedload
 
 from src.database.db import get_db
-from src.database.models import Job, Application, ApplicationStatus
+from src.database.models import Application, ApplicationStatus
+
+
+def _get_clean_company(company):
+    """Get clean company name, filtering out garbage data."""
+    if not company:
+        return "Company not available"
+    garbage = ["favoritt", "legg til", "lagre", "saved", "publisert"]
+    if any(g in company.lower() for g in garbage):
+        return "Company not available"
+    return company
 
 
 def render():
@@ -90,11 +99,21 @@ def render():
             for app in apps:
                 with st.container():
                     st.markdown(f"**{app.job.title}**")
-                    st.caption(app.job.company if app.job.company else "Company not listed")
+                    company = _get_clean_company(app.job.company)
+                    source_icon = "🔵" if app.job.source == "finn" else "🟢"
+                    st.caption(f"{source_icon} {company}")
 
                     if app.applied_date:
                         days_ago = (datetime.utcnow() - app.applied_date).days
-                        st.caption(f"Applied {days_ago} days ago")
+                        date_str = app.applied_date.strftime("%b %d")
+                        if days_ago == 0:
+                            st.caption("📅 Applied today")
+                        elif days_ago == 1:
+                            st.caption("📅 Applied yesterday")
+                        else:
+                            st.caption(f"📅 Applied {date_str} ({days_ago}d ago)")
+                    elif status == ApplicationStatus.INTERESTED:
+                        st.caption("📅 Not yet applied")
 
                     # Action buttons
                     col1, col2 = st.columns(2)
@@ -136,11 +155,11 @@ def render():
         selected_app = st.selectbox(
             "Select application",
             options=all_active,
-            format_func=lambda a: f"{a.job.title} @ {a.job.company or 'Unknown'}",
+            format_func=lambda a: f"{a.job.title} @ {_get_clean_company(a.job.company)}",
         )
 
         if selected_app:
-            st.markdown(f"**{selected_app.job.title}** at {selected_app.job.company}")
+            st.markdown(f"**{selected_app.job.title}** at {_get_clean_company(selected_app.job.company)}")
 
             # Display existing notes
             if selected_app.notes:

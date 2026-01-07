@@ -10,20 +10,69 @@ if str(project_root) not in sys.path:
 
 from datetime import datetime, timedelta
 
-import pandas as pd
 import streamlit as st
-
 from sqlalchemy.orm import joinedload
 
-from src.database.db import get_db
-from src.database.models import Job, Application, ApplicationStatus
 from src.analytics.recommendations import get_top_recommendations
+from src.database.db import get_db
+from src.database.models import Application, ApplicationStatus, Job
+
+
+def _get_suggested_keywords():
+    """Get keyword suggestions based on jobs user has applied to."""
+    from collections import Counter
+    with get_db() as db:
+        # Get jobs user has shown interest in
+        apps = db.query(Application).options(joinedload(Application.job)).filter(
+            Application.status.in_([
+                ApplicationStatus.INTERESTED,
+                ApplicationStatus.APPLIED,
+                ApplicationStatus.INTERVIEW,
+                ApplicationStatus.OFFER
+            ])
+        ).all()
+
+        if not apps:
+            return []
+
+        # Extract words from job titles
+        words = []
+        stopwords = {"and", "or", "the", "a", "an", "in", "at", "for", "to", "of", "med", "og", "i", "-", "/"}
+        for app in apps:
+            title_words = app.job.title.lower().split()
+            for word in title_words:
+                word = word.strip(".,()[]:-/")
+                if len(word) > 2 and word not in stopwords:
+                    words.append(word)
+
+        # Get most common words not in current search keywords
+        current_keywords = {"python", "junior", "utvikler", "developer", "backend", "data", "ml", "machine", "learning"}
+        counter = Counter(words)
+        suggestions = []
+        for word, count in counter.most_common(10):
+            if word not in current_keywords and count >= 2:
+                suggestions.append(word.title())
+
+        return suggestions[:5]
+
+
+def _get_clean_company(company):
+    """Get clean company name, filtering out garbage data."""
+    if not company:
+        return "Company not available"
+
+    # Filter out known garbage strings from scraping
+    garbage = ["favoritt", "legg til", "lagre", "saved", "publisert"]
+    if any(g in company.lower() for g in garbage):
+        return "Company not available"
+
+    return company
 
 
 def render():
     """Render the jobs page."""
     st.title("🔍 Job Browser")
-    
+
     # Daily Recommendations
     with st.expander("💡 **Top 5 Recommended Jobs for You** - Based on your profile", expanded=True):
         recs = get_top_recommendations(5)
@@ -31,22 +80,23 @@ def render():
             for i, rec in enumerate(recs):
                 job = rec["job"]
                 col1, col2, col3 = st.columns([3, 1, 1])
-                
+
                 with col1:
                     reasons = " • ".join(rec["reasons"]) if rec["reasons"] else "Good match"
-                    st.markdown(f"**{i+1}. {job.title}** @ {job.company or 'Unknown'}")
+                    company = _get_clean_company(job.company)
+                    st.markdown(f"**{i+1}. {job.title}** @ {company}")
                     st.caption(f"{rec['match_percentage']}% match - {reasons}")
-                
+
                 with col2:
                     if st.button("⭐", key=f"rec_int_{job.id}", help="Mark Interested", use_container_width=True):
                         _update_status(job.id, ApplicationStatus.INTERESTED)
                         st.rerun()
-                
+
                 with col3:
                     st.link_button("View", job.url, use_container_width=True)
         else:
             st.info("No recommendations available. Run a scrape to find jobs!")
-    
+
     st.markdown("")
 
     # Filters
@@ -64,6 +114,7 @@ def render():
         source_filter = st.selectbox(
             "Source",
             options=["All", "finn", "arbeidsplassen"],
+            format_func=lambda x: {"All": "All Sources", "finn": "🔵 Finn.no", "arbeidsplassen": "🟢 NAV"}.get(x, x),
         )
 
     with col3:
@@ -74,6 +125,17 @@ def render():
             "Application Status",
             options=["All", "Not Applied", "Interested", "Applied", "Interview"],
         )
+
+    # Suggested keywords based on applied jobs
+    suggested = _get_suggested_keywords()
+    if suggested:
+        st.markdown("**💡 Suggested keywords** (based on your interests):")
+        cols = st.columns(len(suggested))
+        for i, kw in enumerate(suggested):
+            with cols[i]:
+                if st.button(kw, key=f"sugg_{kw}", use_container_width=True):
+                    st.session_state["keyword_filter"] = kw
+                    st.rerun()
 
     # Query jobs
     with get_db() as db:
@@ -144,13 +206,17 @@ def render():
                     }
                     status_badge = status_colors.get(job.application.status, "")
 
+                # Source icon
+                source_icon = "🔵" if job.source == "finn" else "🟢"
+
                 st.markdown(f"### {status_badge} {job.title}")
-                st.markdown(f"**{(job.company if job.company else 'Company not listed')}** • {job.location or 'Unknown Location'}")
+                company = _get_clean_company(job.company)
+                st.markdown(f"**{company}** • {job.location or 'Oslo'}")
 
                 if job.posted_date:
-                    st.caption(f"Posted: {job.posted_date.strftime('%Y-%m-%d')} • Source: {job.source}")
+                    st.caption(f"Posted: {job.posted_date.strftime('%Y-%m-%d')} • {source_icon} {job.source.title()}")
                 else:
-                    st.caption(f"Scraped: {job.scraped_at.strftime('%Y-%m-%d %H:%M')} • Source: {job.source}")
+                    st.caption(f"Scraped: {job.scraped_at.strftime('%Y-%m-%d %H:%M')} • {source_icon} {job.source.title()}")
 
             with col2:
                 st.link_button("View Job", job.url, use_container_width=True)

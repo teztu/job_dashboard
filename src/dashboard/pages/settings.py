@@ -84,7 +84,7 @@ def render():
 
         with st.expander("How to configure email"):
             st.markdown("""
-            1. Copy  to 
+            1. Copy  to
             2. Fill in your SMTP settings:
                - **SMTP_HOST**: Your email provider's SMTP server (e.g., smtp.gmail.com)
                - **SMTP_PORT**: Usually 587 for TLS
@@ -104,7 +104,7 @@ def render():
     st.markdown("### Database")
 
     with get_db() as db:
-        from src.database.models import Job, Application, ScrapingLog
+        from src.database.models import Application, Job, ScrapingLog
 
         job_count = db.query(Job).count()
         app_count = db.query(Application).count()

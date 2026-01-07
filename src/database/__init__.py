@@ -1,6 +1,6 @@
 """Database models and utilities."""
 
-from .models import Job, Application, SearchKeyword
 from .db import get_db, init_db
+from .models import Application, Job, SearchKeyword
 
 __all__ = ["Job", "Application", "SearchKeyword", "get_db", "init_db"]

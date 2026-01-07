@@ -2,8 +2,8 @@
 
 import logging
 import re
+from collections.abc import Generator
 from datetime import datetime
-from typing import Generator, Optional
 from urllib.parse import urlencode
 
 from bs4 import BeautifulSoup
@@ -35,7 +35,7 @@ class FinnScraper(BaseScraper):
     def source_name(self) -> str:
         return "finn"
 
-    def _get_location_code(self) -> Optional[str]:
+    def _get_location_code(self) -> str | None:
         """Get Finn.no location code for the configured location."""
         location_lower = self.location.lower()
         return self.LOCATION_CODES.get(location_lower)
@@ -58,7 +58,7 @@ class FinnScraper(BaseScraper):
 
         return f"{self.SEARCH_URL}?{urlencode(params)}"
 
-    def _parse_job_listing(self, article: BeautifulSoup) -> Optional[Job]:
+    def _parse_job_listing(self, article: BeautifulSoup) -> Job | None:
         """Parse a single job listing from search results."""
         try:
             # Find the link element
@@ -91,11 +91,18 @@ class FinnScraper(BaseScraper):
             else:
                 # Try to find in the structure
                 detail_elems = article.find_all("span")
+                # Strings to exclude from company names
+                excluded = ["dag", "time", "uke", "oslo", "bergen", "favoritt", "legg til",
+                           "lagre", "saved", "sist", "publisert", "stillinger"]
                 for elem in detail_elems:
                     text = elem.get_text(strip=True)
-                    if text and not any(x in text.lower() for x in ["dag", "time", "uke", "oslo", "bergen"]):
+                    if text and len(text) > 2 and not any(x in text.lower() for x in excluded):
                         company = text
                         break
+
+            # Final validation - reject if it is still garbage
+            if company and any(x in company.lower() for x in ["favoritt", "legg til", "lagre"]):
+                company = None
 
             # Get location
             location = None
@@ -131,7 +138,7 @@ class FinnScraper(BaseScraper):
             logger.warning(f"Failed to parse job listing: {e}")
             return None
 
-    def _parse_relative_date(self, text: str) -> Optional[datetime]:
+    def _parse_relative_date(self, text: str) -> datetime | None:
         """Parse Norwegian relative date strings like '2 dager siden'."""
         from datetime import timedelta
 
@@ -258,7 +265,7 @@ class FinnScraper(BaseScraper):
         if deadline_elem:
             parent = deadline_elem.parent
             if parent:
-                deadline_text = parent.get_text(strip=True)
+                parent.get_text(strip=True)
                 # Try to parse date - could be various formats
                 # This is simplified, real implementation would need more parsing
 

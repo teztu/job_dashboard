@@ -1,15 +1,14 @@
 """Database connection and utilities."""
 
 import os
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from .models import Base
-
 
 # Default database path
 DEFAULT_DB_PATH = Path(__file__).parent.parent.parent / "jobs.db"

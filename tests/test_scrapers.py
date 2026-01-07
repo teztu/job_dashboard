@@ -1,12 +1,8 @@
 """Tests for job scrapers."""
 
-import pytest
-from unittest.mock import Mock, patch
 
-from src.scrapers.base import BaseScraper
-from src.scrapers.finn import FinnScraper
 from src.scrapers.arbeidsplassen import ArbeidsplassenScraper
-from src.database.models import Job
+from src.scrapers.finn import FinnScraper
 
 
 class TestFinnScraper:

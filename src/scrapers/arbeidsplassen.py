@@ -2,8 +2,8 @@
 
 import logging
 import re
+from collections.abc import Generator
 from datetime import datetime
-from typing import Generator, Optional
 from urllib.parse import urlencode
 
 from bs4 import BeautifulSoup
@@ -35,7 +35,7 @@ class ArbeidsplassenScraper(BaseScraper):
     def source_name(self) -> str:
         return "arbeidsplassen"
 
-    def _get_county_code(self) -> Optional[str]:
+    def _get_county_code(self) -> str | None:
         """Get county code for the configured location."""
         location_lower = self.location.lower()
         return self.COUNTY_CODES.get(location_lower)
@@ -55,7 +55,7 @@ class ArbeidsplassenScraper(BaseScraper):
 
         return f"{self.SEARCH_URL}?{urlencode(params)}"
 
-    def _parse_job_listing(self, item: dict) -> Optional[Job]:
+    def _parse_job_listing(self, item: dict) -> Job | None:
         """Parse a job from the search results JSON."""
         try:
             # Extract basic info
@@ -110,7 +110,7 @@ class ArbeidsplassenScraper(BaseScraper):
             logger.warning(f"Failed to parse job listing: {e}")
             return None
 
-    def _parse_html_listing(self, article: BeautifulSoup) -> Optional[Job]:
+    def _parse_html_listing(self, article: BeautifulSoup) -> Job | None:
         """Parse a job from HTML search results (fallback)."""
         try:
             # Find link

@@ -1,10 +1,9 @@
 """Base scraper class for job sites."""
 
 import logging
-import time
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from datetime import datetime
-from typing import Generator, Optional
 
 import requests
 from ratelimit import limits, sleep_and_retry
@@ -68,7 +67,7 @@ class BaseScraper(ABC):
         """Make a rate-limited GET request."""
         return self.session.get(url, timeout=self.TIMEOUT, **kwargs)
 
-    def _get(self, url: str, **kwargs) -> Optional[requests.Response]:
+    def _get(self, url: str, **kwargs) -> requests.Response | None:
         """Make a GET request with error handling."""
         try:
             response = self._rate_limited_get(url, **kwargs)

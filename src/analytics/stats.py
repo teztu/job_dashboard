@@ -2,15 +2,14 @@
 
 from collections import Counter
 from datetime import datetime, timedelta
-from typing import Optional
 
 import pandas as pd
 
 from ..database.db import get_db
-from ..database.models import Job, Application, ApplicationStatus, SearchKeyword
+from ..database.models import Application, ApplicationStatus, Job, SearchKeyword
 
 
-def get_jobs_dataframe(days: Optional[int] = None) -> pd.DataFrame:
+def get_jobs_dataframe(days: int | None = None) -> pd.DataFrame:
     """Get jobs as a pandas DataFrame.
 
     Args:
@@ -46,7 +45,7 @@ def get_jobs_dataframe(days: Optional[int] = None) -> pd.DataFrame:
         return pd.DataFrame(data)
 
 
-def get_jobs_by_source(days: Optional[int] = None) -> dict[str, int]:
+def get_jobs_by_source(days: int | None = None) -> dict[str, int]:
     """Get job counts by source.
 
     Args:
@@ -61,7 +60,7 @@ def get_jobs_by_source(days: Optional[int] = None) -> dict[str, int]:
     return df["source"].value_counts().to_dict()
 
 
-def get_jobs_by_company(days: Optional[int] = None, top_n: int = 10) -> dict[str, int]:
+def get_jobs_by_company(days: int | None = None, top_n: int = 10) -> dict[str, int]:
     """Get top companies by job count.
 
     Args:
@@ -160,7 +159,7 @@ def get_application_pipeline() -> dict[str, int]:
         return pipeline
 
 
-def get_common_skills(days: Optional[int] = None, top_n: int = 20) -> dict[str, int]:
+def get_common_skills(days: int | None = None, top_n: int = 20) -> dict[str, int]:
     """Extract common skills/keywords from job descriptions.
 
     Args:

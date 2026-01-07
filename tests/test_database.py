@@ -1,10 +1,11 @@
 """Tests for database models and utilities."""
 
-import pytest
 from datetime import datetime
 
-from src.database.db import init_db, get_db, drop_db
-from src.database.models import Job, Application, ApplicationStatus, SearchKeyword
+import pytest
+
+from src.database.db import drop_db, get_db, init_db
+from src.database.models import Application, ApplicationStatus, Job, SearchKeyword
 
 
 @pytest.fixture(autouse=True)

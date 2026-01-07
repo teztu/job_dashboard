@@ -6,7 +6,6 @@ import smtplib
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Optional
 
 from ..database.db import get_db
 from ..database.models import Job
@@ -31,7 +30,7 @@ def is_email_configured() -> bool:
     return all([config["user"], config["password"], config["recipient"]])
 
 
-def send_email(subject: str, body_html: str, body_text: Optional[str] = None) -> bool:
+def send_email(subject: str, body_html: str, body_text: str | None = None) -> bool:
     """Send an email notification.
 
     Args:

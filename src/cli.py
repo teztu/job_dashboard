@@ -9,8 +9,8 @@ import click
 from dotenv import load_dotenv
 
 from .database.db import get_db, init_db
-from .database.models import Job, Application, ApplicationStatus, SearchKeyword
-from .scrapers import FinnScraper, ArbeidsplassenScraper
+from .database.models import Application, ApplicationStatus, Job, SearchKeyword
+from .scrapers import ArbeidsplassenScraper, FinnScraper
 
 # Load environment variables
 load_dotenv()
