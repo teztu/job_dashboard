@@ -1,10 +1,18 @@
 """Analytics and insights page."""
 
+import sys
+from pathlib import Path
+
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
-from ...analytics.stats import (
+from src.analytics.stats import (
     get_jobs_dataframe,
     get_jobs_by_source,
     get_jobs_by_company,
@@ -12,7 +20,7 @@ from ...analytics.stats import (
     get_keyword_stats,
     get_application_pipeline,
 )
-from ...analytics.keywords import get_keyword_effectiveness, get_keyword_recommendations
+from src.analytics.keywords import get_keyword_effectiveness, get_keyword_recommendations
 
 
 def render():

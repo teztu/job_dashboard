@@ -1,5 +1,13 @@
 """Main Streamlit dashboard for Job Hunter."""
 
+import sys
+from pathlib import Path
+
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 import streamlit as st
 
 st.set_page_config(
@@ -10,7 +18,7 @@ st.set_page_config(
 )
 
 # Initialize database
-from ..database.db import init_db
+from src.database.db import init_db
 init_db()
 
 # Page navigation
@@ -32,14 +40,14 @@ st.sidebar.markdown("Built with [Claude Code](https://claude.com/claude-code)")
 
 # Load selected page
 if page == "Jobs":
-    from .pages import jobs
+    from src.dashboard.pages import jobs
     jobs.render()
 elif page == "Applications":
-    from .pages import applications
+    from src.dashboard.pages import applications
     applications.render()
 elif page == "Analytics":
-    from .pages import analytics
+    from src.dashboard.pages import analytics
     analytics.render()
 elif page == "Settings":
-    from .pages import settings
+    from src.dashboard.pages import settings
     settings.render()

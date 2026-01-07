@@ -32,6 +32,7 @@ dependencies = [
     "click>=8.1.0",
     "python-dotenv>=1.0.0",
     "ratelimit>=2.2.1",
+    "keyring>=24.0.0",
 ]
 
 [project.optional-dependencies]

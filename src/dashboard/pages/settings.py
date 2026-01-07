@@ -1,11 +1,19 @@
 """Settings page."""
 
+import sys
+from pathlib import Path
+
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 import os
 
 import streamlit as st
 
-from ...database.db import get_db, init_db
-from ...database.models import SearchKeyword
+from src.database.db import get_db, init_db
+from src.database.models import SearchKeyword
 
 
 def render():
@@ -57,7 +65,7 @@ def render():
     st.markdown("### Search Location")
     current_location = os.getenv("SEARCH_LOCATION", "Oslo")
     st.info(f"Current location: **{current_location}**")
-    st.caption("Edit the `.env` file to change the search location")
+    st.caption("Edit the  file to change the search location")
 
     st.markdown("---")
 
@@ -72,11 +80,11 @@ def render():
         st.caption(f"Sending to: {notification_email}")
     else:
         st.warning("⚠️ Email notifications not configured")
-        st.caption("Edit the `.env` file to configure SMTP settings")
+        st.caption("Edit the  file to configure SMTP settings")
 
         with st.expander("How to configure email"):
             st.markdown("""
-            1. Copy `.env.example` to `.env`
+            1. Copy  to 
             2. Fill in your SMTP settings:
                - **SMTP_HOST**: Your email provider's SMTP server (e.g., smtp.gmail.com)
                - **SMTP_PORT**: Usually 587 for TLS
@@ -96,7 +104,7 @@ def render():
     st.markdown("### Database")
 
     with get_db() as db:
-        from ...database.models import Job, Application, ScrapingLog
+        from src.database.models import Job, Application, ScrapingLog
 
         job_count = db.query(Job).count()
         app_count = db.query(Application).count()
@@ -109,7 +117,7 @@ def render():
 
     if st.button("🗑️ Clear All Data", type="secondary"):
         if st.checkbox("I understand this will delete all data"):
-            from ...database.db import drop_db
+            from src.database.db import drop_db
 
             drop_db()
             init_db()
