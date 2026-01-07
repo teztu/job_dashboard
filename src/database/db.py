@@ -44,6 +44,7 @@ def get_session_factory():
             bind=get_engine(),
             autocommit=False,
             autoflush=False,
+            expire_on_commit=False,  # Allow accessing loaded attributes after session closes
         )
     return _SessionLocal
 
