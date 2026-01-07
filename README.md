@@ -25,8 +25,8 @@ AI-powered job hunting assistant for the Norwegian job market. Automatically scr
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/teztu/job-hunter.git
-cd job-hunter
+git clone https://github.com/teztu/job_dashboard.git
+cd job_dashboard
 ```
 
 2. Create a virtual environment:
@@ -128,14 +128,14 @@ ruff check src/ tests/
 
 ## Roadmap
 
-### MVP (Current)
+### MVP (Complete!)
 - [x] Project setup with GitHub workflows
-- [ ] Database models (Job, Application, SearchKeyword)
-- [ ] Finn.no scraper
-- [ ] Arbeidsplassen.no scraper
-- [ ] Basic dashboard
-- [ ] CLI interface
-- [ ] Daily automation
+- [x] Database models (Job, Application, SearchKeyword)
+- [x] Finn.no scraper
+- [x] Arbeidsplassen.no scraper
+- [x] Streamlit dashboard
+- [x] CLI interface
+- [x] Daily automation via GitHub Actions
 
 ### Future: AI Features
 - [ ] AI job matching (score jobs against your profile)

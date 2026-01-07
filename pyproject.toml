@@ -45,9 +45,9 @@ dev = [
 job-hunter = "src.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/teztu/job-hunter"
-Repository = "https://github.com/teztu/job-hunter"
-Issues = "https://github.com/teztu/job-hunter/issues"
+Homepage = "https://github.com/teztu/job_dashboard"
+Repository = "https://github.com/teztu/job_dashboard"
+Issues = "https://github.com/teztu/job_dashboard/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
