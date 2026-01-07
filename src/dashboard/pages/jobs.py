@@ -13,6 +13,8 @@ from datetime import datetime, timedelta
 import pandas as pd
 import streamlit as st
 
+from sqlalchemy.orm import joinedload
+
 from src.database.db import get_db
 from src.database.models import Job, Application, ApplicationStatus
 
@@ -49,7 +51,7 @@ def render():
 
     # Query jobs
     with get_db() as db:
-        query = db.query(Job)
+        query = db.query(Job).options(joinedload(Job.application))
 
         # Apply filters
         since = datetime.utcnow() - timedelta(days=days_filter)

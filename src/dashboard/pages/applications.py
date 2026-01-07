@@ -12,6 +12,8 @@ from datetime import datetime
 
 import streamlit as st
 
+from sqlalchemy.orm import joinedload
+
 from src.database.db import get_db
 from src.database.models import Job, Application, ApplicationStatus
 
@@ -23,7 +25,7 @@ def render():
     # Get all jobs with applications
     with get_db() as db:
         applications = (
-            db.query(Application)
+            db.query(Application).options(joinedload(Application.job))
             .join(Job)
             .order_by(Application.updated_at.desc())
             .all()
