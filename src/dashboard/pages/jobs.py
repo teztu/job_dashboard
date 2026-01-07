@@ -145,7 +145,7 @@ def render():
                     status_badge = status_colors.get(job.application.status, "")
 
                 st.markdown(f"### {status_badge} {job.title}")
-                st.markdown(f"**{job.company or 'Unknown Company'}** • {job.location or 'Unknown Location'}")
+                st.markdown(f"**{(job.company if job.company else 'Company not listed')}** • {job.location or 'Unknown Location'}")
 
                 if job.posted_date:
                     st.caption(f"Posted: {job.posted_date.strftime('%Y-%m-%d')} • Source: {job.source}")

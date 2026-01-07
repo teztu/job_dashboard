@@ -25,7 +25,8 @@ from src.analytics.keywords import get_keyword_effectiveness, get_keyword_recomm
 
 def render():
     """Render the analytics page."""
-    st.title("📊 Analytics & Insights")
+    st.title("📊 Statistics")
+    st.caption("Track your job search progress and get recommendations")
 
     # Time period selector
     days = st.selectbox(
@@ -165,3 +166,89 @@ def render():
                         st.caption(f"Consider: {', '.join(rec['suggestions'])}")
     else:
         st.info("Run a scrape to see keyword analytics")
+
+    st.markdown("---")
+    
+    # Recommended Actions based on pipeline
+    st.markdown("### 💡 Recommended Actions")
+    
+    pipeline = get_application_pipeline()
+    interested = pipeline.get("interested", 0)
+    applied = pipeline.get("applied", 0)
+    interviews = pipeline.get("interview", 0)
+    offers = pipeline.get("offer", 0)
+    rejected = pipeline.get("rejected", 0)
+    
+    actions = []
+    
+    # Generate recommendations based on pipeline status
+    if interested == 0 and applied == 0:
+        actions.append({
+            "priority": "high",
+            "action": "Start saving jobs",
+            "detail": "Browse jobs and click ⭐ to save interesting positions. Aim for 10-20 saved jobs to start."
+        })
+    elif interested > 5 and applied == 0:
+        actions.append({
+            "priority": "high", 
+            "action": "Start applying!",
+            "detail": f"You have {interested} saved jobs but no applications. Pick your top 3 and apply today."
+        })
+    elif applied > 0 and applied < 5:
+        actions.append({
+            "priority": "medium",
+            "action": "Increase application volume",
+            "detail": f"Only {applied} applications sent. Aim for 5-10 per week for best results."
+        })
+    
+    if applied >= 5 and interviews == 0:
+        actions.append({
+            "priority": "high",
+            "action": "Review your CV and cover letter",
+            "detail": f"{applied} applications but no interviews. Your application materials may need improvement."
+        })
+    elif applied >= 10 and interviews == 0:
+        actions.append({
+            "priority": "high",
+            "action": "Get feedback on applications",
+            "detail": "Consider having someone review your CV or try different job types."
+        })
+    
+    if interviews > 0 and offers == 0 and rejected >= interviews:
+        actions.append({
+            "priority": "medium",
+            "action": "Practice interview skills",
+            "detail": "Interviews but no offers. Practice common questions and prepare better examples."
+        })
+    
+    if rejected > applied * 0.8 and applied > 5:
+        actions.append({
+            "priority": "medium",
+            "action": "Adjust your target roles",
+            "detail": "High rejection rate. Consider if you are applying for roles that match your experience level."
+        })
+    
+    if interested > 10:
+        actions.append({
+            "priority": "low",
+            "action": "Review saved jobs",
+            "detail": f"{interested} jobs saved. Go through them and apply to the best matches or remove outdated ones."
+        })
+    
+    if not actions:
+        if offers > 0:
+            st.success("🎉 **Congratulations!** You have offers on the table. Good luck with your decision!")
+        elif interviews > 0:
+            st.info("✅ **On track!** You have interviews scheduled. Keep applying while you wait for results.")
+        elif applied > 0:
+            st.info("✅ **Good progress!** Keep applying and follow up on sent applications after 1 week.")
+        else:
+            st.info("Start by browsing jobs and saving ones that interest you.")
+    else:
+        for action in actions:
+            if action["priority"] == "high":
+                st.error(f"🔴 **{action['action']}** - {action['detail']}")
+            elif action["priority"] == "medium":
+                st.warning(f"🟡 **{action['action']}** - {action['detail']}")
+            else:
+                st.info(f"🔵 **{action['action']}** - {action['detail']}")

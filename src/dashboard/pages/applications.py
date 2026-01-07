@@ -20,13 +20,13 @@ from src.database.models import Job, Application, ApplicationStatus
 
 def render():
     """Render the applications page."""
-    st.title("📋 Application Tracker")
+    st.title("📋 My Applications")
+    st.caption("Track your job applications from interested to offer")
 
     # Get all jobs with applications
     with get_db() as db:
         applications = (
             db.query(Application).options(joinedload(Application.job))
-            .join(Job)
             .order_by(Application.updated_at.desc())
             .all()
         )
@@ -35,6 +35,17 @@ def render():
         by_status = {}
         for status in ApplicationStatus:
             by_status[status] = [a for a in applications if a.status == status]
+
+    # Check if empty
+    if len(applications) == 0:
+        st.info("""
+        **No saved jobs yet!**
+
+        Go to **Browse Jobs** and click the **⭐ Interested** button to save jobs you want to apply for.
+
+        Your saved jobs will appear here so you can track your application progress.
+        """)
+        return
 
     # Pipeline stats
     st.markdown("### Pipeline Overview")
@@ -79,7 +90,7 @@ def render():
             for app in apps:
                 with st.container():
                     st.markdown(f"**{app.job.title}**")
-                    st.caption(f"{app.job.company or 'Unknown'}")
+                    st.caption(app.job.company if app.job.company else "Company not listed")
 
                     if app.applied_date:
                         days_ago = (datetime.utcnow() - app.applied_date).days
