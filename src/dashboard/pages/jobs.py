@@ -17,11 +17,37 @@ from sqlalchemy.orm import joinedload
 
 from src.database.db import get_db
 from src.database.models import Job, Application, ApplicationStatus
+from src.analytics.recommendations import get_top_recommendations
 
 
 def render():
     """Render the jobs page."""
     st.title("🔍 Job Browser")
+    
+    # Daily Recommendations
+    with st.expander("💡 **Top 5 Recommended Jobs for You** - Based on your profile", expanded=True):
+        recs = get_top_recommendations(5)
+        if recs:
+            for i, rec in enumerate(recs):
+                job = rec["job"]
+                col1, col2, col3 = st.columns([3, 1, 1])
+                
+                with col1:
+                    reasons = " • ".join(rec["reasons"]) if rec["reasons"] else "Good match"
+                    st.markdown(f"**{i+1}. {job.title}** @ {job.company or 'Unknown'}")
+                    st.caption(f"{rec['match_percentage']}% match - {reasons}")
+                
+                with col2:
+                    if st.button("⭐", key=f"rec_int_{job.id}", help="Mark Interested", use_container_width=True):
+                        _update_status(job.id, ApplicationStatus.INTERESTED)
+                        st.rerun()
+                
+                with col3:
+                    st.link_button("View", job.url, use_container_width=True)
+        else:
+            st.info("No recommendations available. Run a scrape to find jobs!")
+    
+    st.markdown("")
 
     # Filters
     col1, col2, col3, col4 = st.columns(4)
