@@ -90,6 +90,7 @@ st.sidebar.caption(f"📁 {total_jobs} jobs")
 st.sidebar.caption(f"⭐ {saved_count} saved")
 st.sidebar.caption(f"📤 {applied_count} applied")
 st.sidebar.markdown("---")
+st.sidebar.link_button("⭐ GitHub Repo", "https://github.com/teztu/job_dashboard", use_container_width=True)
 st.sidebar.caption("Built with [Claude Code](https://claude.com/claude-code)")
 
 
